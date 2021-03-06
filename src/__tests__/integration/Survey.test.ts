@@ -33,8 +33,6 @@ describe('Surveys', async () => {
 
         expect(response.status).toBe(200);
 
-        console.log('OPA', response.body);
-
         expect(response.body.length).toBe(1);
         expect(response.body[0].title).toBe('title');
         expect(response.body[0].description).toBe('description');
