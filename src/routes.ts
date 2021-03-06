@@ -13,6 +13,6 @@ router.get("/surveys", surveysController.show);
 router.post("/surveys", surveysController.create);
 
 const sendMailController = new SendMailController();
-router.post("/send-mail", sendMailController.execute);
+router.post("/send-mail", (req, res) => sendMailController.execute(req, res));
 
 export { router };
