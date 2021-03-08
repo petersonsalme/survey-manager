@@ -9,6 +9,12 @@ describe('Users', async () => {
         await connection.runMigrations();
     });
 
+    afterAll(async () => {
+        const connection = await createConnection();
+        await connection.dropDatabase();
+        await connection.close();
+    });
+
     it('should create new user', async () => {
         const response = await request(app)
         .post('/users')
