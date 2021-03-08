@@ -11,8 +11,6 @@ import { SurveyUser } from "../model/SurveyUser";
 
 class SendMailController {
 
-    constructor() {}
-
     async execute(request: Request, response: Response) {
         const {email, survey_id} = request.body;
 
@@ -22,7 +20,7 @@ class SendMailController {
             const surveyUser = await this.getSurveyUserBy(user, survey);
 
             const npsPath = path.resolve(__dirname, '..', 'view', 'email', 'npsMail.hbs');
-            const variables = this.buildTemplateVariables(user, survey);
+            const variables = this.buildTemplateVariables(user, survey, surveyUser);
 
             await SendMailService.execute(email, survey.title, variables, npsPath.toString());
 
@@ -55,12 +53,12 @@ class SendMailController {
         return survey;
     }
 
-    private buildTemplateVariables(user: User, survey: Survey) {
+    private buildTemplateVariables(user: User, survey: Survey, surveyUser: SurveyUser) {
         return {
             name: user.name,
             title: survey.title,
             description: survey.description,
-            user_id: user.id,
+            id: surveyUser.id,
             link: process.env.ANSWER_URL
         }
     }
@@ -68,7 +66,7 @@ class SendMailController {
     private async getSurveyUserBy(user: User, survey: Survey): Promise<SurveyUser> {
         const surveysUsersRepository = getCustomRepository(SurveysUsersRepository);
         const existentSurveysUsers = await surveysUsersRepository.findOne({
-            where: [{ user_id: user.id }, { value: null }],
+            where: { user_id: user.id, value: null },
             relations: ['user', 'survey']
         });
         
