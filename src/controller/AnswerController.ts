@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
+import { AppError } from "../error/AppError";
 import { SurveysUsersRepository } from "../repository/SurveysUsersRepository";
 
 class AnswerController {
@@ -11,9 +12,7 @@ class AnswerController {
         const surveysUsersRepository = getCustomRepository(SurveysUsersRepository);
         const surveysUsers = await surveysUsersRepository.findOne({ id: String(u) });
         if (!surveysUsers) {
-            return response.status(400).json({
-                message: `Cannot find by uuid ${u}`
-            });
+            throw new AppError(`Cannot find by uuid ${u}`, 400);
         }
 
         surveysUsers.value = Number(value);

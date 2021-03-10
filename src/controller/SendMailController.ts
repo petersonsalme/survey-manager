@@ -8,36 +8,30 @@ import path from 'path';
 import { User } from "../model/User";
 import { Survey } from "../model/Survey";
 import { SurveyUser } from "../model/SurveyUser";
+import { AppError } from "../error/AppError";
 
 class SendMailController {
 
     async execute(request: Request, response: Response) {
         const {email, survey_id} = request.body;
 
-        try {
-            const user = await this.getUserBy(email);
-            const survey = await this.getSurveyBy(survey_id);
-            const surveyUser = await this.getSurveyUserBy(user, survey);
+        const user = await this.getUserBy(email);
+        const survey = await this.getSurveyBy(survey_id);
+        const surveyUser = await this.getSurveyUserBy(user, survey);
 
-            const npsPath = path.resolve(__dirname, '..', 'view', 'email', 'npsMail.hbs');
-            const variables = this.buildTemplateVariables(user, survey, surveyUser);
+        const npsPath = path.resolve(__dirname, '..', 'view', 'email', 'npsMail.hbs');
+        const variables = this.buildTemplateVariables(user, survey, surveyUser);
 
-            await SendMailService.execute(email, survey.title, variables, npsPath.toString());
+        await SendMailService.execute(email, survey.title, variables, npsPath.toString());
 
-            return response.json(surveyUser);
-        } catch(error) {
-            return response.status(400).json({
-                name: error.name,
-                message: error.message
-            });
-        }
+        return response.json(surveyUser);
     }
 
     private async getUserBy(email: string): Promise<User> {
         const usersRepository = getCustomRepository(UsersRepository);
         const user = await usersRepository.findOne({ email });
         if (!user) {
-            throw Error(`User cannot be found by email ${email}`)
+            throw new AppError(`User cannot be found by email ${email}`)
         }
 
         return user;
@@ -47,7 +41,7 @@ class SendMailController {
         const surveysRepository = getCustomRepository(SurveysRepository);
         const survey = await surveysRepository.findOne({ id });
         if (!survey) {
-            throw Error(`Survey cannot be found by id ${id}`);
+            throw new AppError(`Survey cannot be found by id ${id}`);
         }
 
         return survey;
